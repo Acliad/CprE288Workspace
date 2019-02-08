@@ -20,10 +20,10 @@ int main(void)
     oi_t *sensor_data = oi_alloc();
     oi_init(sensor_data);
 
-    int distance_moved = move_forward(sensor_data, 200);
-    lcd_printf("Traveled %dcm", distance_moved);
+//    int distance_moved = move_forward(sensor_data, 200);
+//    lcd_printf("Traveled %dcm", distance_moved);
 
-    /**
+
     int distance_moved;
     int degrees_turned;
 
@@ -53,7 +53,6 @@ int main(void)
     lcd_gotoLine(1);
     lcd_printf("Traveled %dcm", distance_moved);
 
-     **/
     oi_free(sensor_data);
     return (0);
 }
