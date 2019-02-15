@@ -57,33 +57,32 @@ void button_init() {
  * Interrupt handler -- executes when a hardware event occurs (a button is pressed)
  */
 void init_button_interrupts(int *button_event_addr, int *button_num_addr) {
+    // Store the pointer to the given button_event boolean
+    button_event_ptr = button_event_addr;
+    // Store the pointer to the given button_num int
+    button_num_ptr = button_num_addr;
 
-    #warning: "Unimplemented function: void init_button_interrupts(int *button_event_addr, int *button_num_addr) -- You must configure GPIO to detect interrupts" // delete warning after implementing
-    // In order to configure GPIO ports to detect interrupts, you will need to visit pg. 656 in the Tiva datasheet.
-    // Notice that you already followed some steps in 10.3 for initialization and configuration of the GPIO ports in the function button_init().
-    // Additional steps for setting up the GPIO port to detect interrupts have been outlined below.
-    // TODO: Complete code below
+    // Set up the GPIO pins
+    button_init();
 
     // Mask the bits for pins 0-5
-    //1. GPIO_PORTE_IM_R &=
+    GPIO_PORTE_IM_R &= 0b11000000;
 
     // Set pins 0-5 to use edge sensing
-    //2. GPIO_PORTE_IS_R &=
+    GPIO_PORTE_IS_R &= 0b11000000;
 
     // Set pins 0-5 to use both edges. We want to update the LCD
     // when a button is pressed, and when the button is released.
-    //3. GPIO_PORTE_IBE_R |=
+    GPIO_PORTE_IBE_R |= 0b11111111;
 
     // Clear the interrupts
-    //4. GPIO_PORTE_ICR_R =
+    GPIO_PORTE_ICR_R = 0;
 
     // Unmask the bits for pins 0-5
-    //5. GPIO_PORTE_IM_R |=
+    GPIO_PORTE_IM_R |= 0b00111111;
 
-    #warning: "Unimplemented function: void init_button_interrupts(int *button_event_addr, int *button_num_addr) -- You must configure interrupts" // delete warning after implementing
-    // TODO: Complete code below
     // Enable GPIO port E interrupt
-    //6. NVIC_EN0_R |=
+    NVIC_EN0_R |= BIT4;
 
     // Bind the interrupt to the handler.
     IntRegister(INT_GPIOE, gpioe_handler);
@@ -94,10 +93,12 @@ void init_button_interrupts(int *button_event_addr, int *button_num_addr) {
  */
 void gpioe_handler() {
 
-#warning: "Unimplemented function: void gpioe_handler() -- You must configure interrupts" // delete warning after implementing
     // Clear interrupt status register
-    // GPIO_PORTE_ICR_R =
-    // update *button_event_ptr = 1;
+    GPIO_PORTE_ICR_R = 0xFF;
+
+    // Set the button_event flag
+    *button_event_ptr = 1;
+    // Store the value of the highest button pressed at the given button_num address
     *button_num_ptr = button_getButton();
 }
 

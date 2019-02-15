@@ -7,24 +7,38 @@
 #include "lcd.h"
 #include "button.h"
 
-volatile int button_event = 0; // Boolean to keep track of whether a hardware event has happened (button pressed)
-volatile int button_num = 0; // keeps track of button pressed
-
 /**
  * main.c
  * Prints the button that has been pressed
  */
 int main(void) {
-    // Hint: You may need to use pointers to return the button that has been pressed
+    volatile int button_event = 0; // Boolean to track if a button was pressed or released
+    volatile int button_pressed = 0; // The highest button number that is currently pressed
+
+    // Initialize the LCD
+    lcd_init();
+    // Initialize the GPIO interrupts for the buttons
+    init_button_interrupts(&button_event, &button_pressed);
+    // Draw the default button state on the LCD
+    lcd_printf("Button #%d pressed", button_pressed);
+
+    while(1) {
+            if(button_event) {
+                lcd_printf("Button #%d pressed", button_pressed);
+                button_event  = 0;
+            }
+        }
+
+    /** Part 1
     lcd_init();
     button_init();
     int button_pressed;
-
     while(1) {
         button_pressed = button_getButton();
         lcd_printf("Button #%d pressed", button_pressed);
     }
 
+    */
     // Not necessary, but convention
     return 0;
 }
