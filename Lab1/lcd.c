@@ -317,7 +317,6 @@ void lcd_rotatingBanner(char dispText[]){
     }
 
     lcd_clear();
-    timer_waitMillis(500);
 }
 
 /**
