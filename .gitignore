@@ -1,3 +1,13 @@
+#CCS Files
+.jxbrowser-data/
+.metadata/
+RemoteSystemsTempFiles/
+
+Debug/
+targetConfigs/
+tm4c123gh6pm.cmd
+tm4c123gh6pm_startup_ccs.c
+
 # Created by https://www.gitignore.io/api/eclipse
 
 ### Eclipse ###
