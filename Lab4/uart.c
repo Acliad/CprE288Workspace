@@ -8,6 +8,9 @@
 
 #include "uart.h"
 
+// Pointer to the char received
+volatile char *received_char;
+
 #define BIT0        0x01
 #define BIT1        0x02
 #define BIT2        0x04
@@ -39,7 +42,7 @@ void uart_init(void){
     GPIO_PORTB_PCTL_R |= 0x11;
 
     //enable PB0 and PB1 for i/o
-    GPIO_PORTB_DEN_R |= 0x11;
+    GPIO_PORTB_DEN_R |= BIT0 | BIT1;
 
     //set PB0 as input
     GPIO_PORTB_DIR_R &= ~BIT0;
@@ -50,11 +53,23 @@ void uart_init(void){
     //disable uart before configuration
     UART1_CTL_R &= ~(BIT0);
 
-    //integer baud rate register for uart1
+
+    /*
+    //integer baud rate register for uart1 (9,600) (16 MHz / (16 * 9,600))
     UART1_IBRD_R  = 104;
 
-    //fractional baud rate register for uart1
+    //fractional baud rate register for uart1 (9,600)
     UART1_FBRD_R = 11;
+    */
+
+
+    //integer baud rate register for uart1 (115,200) (16 MHz / (16 * 115,200))
+    UART1_IBRD_R  = 8;
+
+    //fractional baud rate register for uart1 (115,200)
+    UART1_FBRD_R  = 44;
+
+
 
     //configure line control
     UART1_LCRH_R = 0x60;
@@ -65,24 +80,64 @@ void uart_init(void){
     //enable uart1
     UART1_CTL_R |= UART_CTL_RXE | UART_CTL_TXE | UART_CTL_UARTEN;
 
+
     initialized = 1;
 
 }
 
-//sends a character over the uart port
-void uart_sendChar(char data){
+/*
+ * Sets up UART1 to use interrupts
+ */
+void init_uart1_int(char *char_tracker) {
+    // Initialize UART1
+    uart_init();
 
+    // Get the address of the given variable for putting in the char data
+    received_char = char_tracker;
+
+    //configure the interrupt mask register to allow receive interrupts
+    UART1_IM_R |= UART_ICR_RXIC;
+
+    // Enable UART1 to interrupt
+    NVIC_EN0_R |= BIT6;
+
+    //Bind the interrupt to the handler
+    IntRegister(INT_UART1, uart1_handler);
 }
 
-//receives a character in the uart port
+/*
+ * sends a character over the uart port to the putty terminal
+ */
+void uart_sendChar(char data){
+
+    //wait until there is room to send data
+    while(UART1_FR_R & 0x20){
+    }
+
+    //send data
+    UART1_DR_R = data;
+}
+
+/*
+ * receives a character in the uart port
+ */
 char uart_receive(void){
     char received;
 
     while(!(UART1_FR_R & BIT6)){
     }
 
-    received = UART1_DR_R & 0xFF;
+    received = (char) UART1_DR_R & 0xFF;
 
     return received;
+}
+
+/*
+ * handles the uart1 interrupt
+ */
+void uart1_handler(){
+    *received_char = (char) UART1_DR_R & 0xFF;
+
+    UART1_ICR_R |= UART_ICR_RXIC;
 }
 

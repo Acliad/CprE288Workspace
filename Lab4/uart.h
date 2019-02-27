@@ -25,4 +25,10 @@ void uart_sendChar(char data);
 //receives a character in the uart port
 char uart_receive(void);
 
+//handles uart1 interrupt
+void uart1_handler();
+
+//initialize uart1 to handle interrupts
+void init_uart1_int(char *char_tracker);
+
 #endif
