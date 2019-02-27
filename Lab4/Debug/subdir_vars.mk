@@ -9,45 +9,45 @@ CMD_SRCS += \
 ../tm4c123gh6pm.cmd 
 
 C_SRCS += \
-../l4_main.c \
+../button.c \
 ../lcd.c \
+../main.c \
 ../timer.c \
-../tm4c123gh6pm_startup_ccs.c \
-../uart.c 
+../tm4c123gh6pm_startup_ccs.c 
 
 C_DEPS += \
-./l4_main.d \
+./button.d \
 ./lcd.d \
+./main.d \
 ./timer.d \
-./tm4c123gh6pm_startup_ccs.d \
-./uart.d 
+./tm4c123gh6pm_startup_ccs.d 
 
 OBJS += \
-./l4_main.obj \
+./button.obj \
 ./lcd.obj \
+./main.obj \
 ./timer.obj \
-./tm4c123gh6pm_startup_ccs.obj \
-./uart.obj 
+./tm4c123gh6pm_startup_ccs.obj 
 
 OBJS__QUOTED += \
-"l4_main.obj" \
+"button.obj" \
 "lcd.obj" \
+"main.obj" \
 "timer.obj" \
-"tm4c123gh6pm_startup_ccs.obj" \
-"uart.obj" 
+"tm4c123gh6pm_startup_ccs.obj" 
 
 C_DEPS__QUOTED += \
-"l4_main.d" \
+"button.d" \
 "lcd.d" \
+"main.d" \
 "timer.d" \
-"tm4c123gh6pm_startup_ccs.d" \
-"uart.d" 
+"tm4c123gh6pm_startup_ccs.d" 
 
 C_SRCS__QUOTED += \
-"../l4_main.c" \
+"../button.c" \
 "../lcd.c" \
+"../main.c" \
 "../timer.c" \
-"../tm4c123gh6pm_startup_ccs.c" \
-"../uart.c" 
+"../tm4c123gh6pm_startup_ccs.c" 
 
 

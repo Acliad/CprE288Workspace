@@ -10,11 +10,11 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./l4_main.obj" \
+"./button.obj" \
 "./lcd.obj" \
+"./main.obj" \
 "./timer.obj" \
 "./tm4c123gh6pm_startup_ccs.obj" \
-"./uart.obj" \
 "../tm4c123gh6pm.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
@@ -159,8 +159,8 @@ Lab4.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "l4_main.obj" "lcd.obj" "timer.obj" "tm4c123gh6pm_startup_ccs.obj" "uart.obj" 
-	-$(RM) "l4_main.d" "lcd.d" "timer.d" "tm4c123gh6pm_startup_ccs.d" "uart.d" 
+	-$(RM) "button.obj" "lcd.obj" "main.obj" "timer.obj" "tm4c123gh6pm_startup_ccs.obj" 
+	-$(RM) "button.d" "lcd.d" "main.d" "timer.d" "tm4c123gh6pm_startup_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

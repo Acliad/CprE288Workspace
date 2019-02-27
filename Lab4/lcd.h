@@ -1,8 +1,8 @@
 /*
  * lcd.h
  *
- *  @author: nbergman
- *  @date:  Mar 1, 2016
+ *  Created on: Mar 1, 2016
+ *      Author: nbergman
  */
 
 #ifndef LCD_H_
@@ -35,10 +35,6 @@ void lcd_gotoLine(uint8_t lineNum);
 ///Set cursor position - top left is 0,0
 void lcd_setCursorPos(uint8_t x, uint8_t y);
 
-//Print a formatted string to the LCD screen
 void lcd_printf(const char *format, ...);
-
-//Prints a rotating banner of text to the LCD screen
-void lcd_rotatingBanner(char dispText[]);
 
 #endif /* LCD_H_ */
