@@ -53,14 +53,13 @@ void uart_init(void){
     //disable uart before configuration
     UART1_CTL_R &= ~(BIT0);
 
-
     /*
-    //integer baud rate register for uart1 (9,600) (16 MHz / (16 * 9,600))
+     * //integer baud rate register for uart1 (9,600) (16 MHz / (16 * 9,600))
     UART1_IBRD_R  = 104;
 
     //fractional baud rate register for uart1 (9,600)
     UART1_FBRD_R = 11;
-    */
+     */
 
 
     //integer baud rate register for uart1 (115,200) (16 MHz / (16 * 115,200))
@@ -68,8 +67,6 @@ void uart_init(void){
 
     //fractional baud rate register for uart1 (115,200)
     UART1_FBRD_R  = 44;
-
-
 
     //configure line control
     UART1_LCRH_R = 0x60;
@@ -140,4 +137,6 @@ void uart1_handler(){
 
     UART1_ICR_R |= UART_ICR_RXIC;
 }
+
+
 
