@@ -6,7 +6,6 @@
  *      Author: jmartin3, irex
  */
 
-
 #include "uart.h"
 
 // Pointer to the char received
@@ -22,11 +21,13 @@ volatile char *received_char;
 #define BIT7        0x80
 
 //sets up the uart ports
-void uart_init(void){
+void uart_init(void)
+{
     static uint8_t initialized = 0;
 
     //Check if already initialized
-    if(initialized){
+    if (initialized)
+    {
         return;
     }
 
@@ -37,7 +38,7 @@ void uart_init(void){
     SYSCTL_RCGCGPIO_R |= BIT1;
 
     //enable the alternate function for PB0 and PB1
-    GPIO_PORTB_AFSEL_R |= (BIT0|BIT1);
+    GPIO_PORTB_AFSEL_R |= (BIT0 | BIT1);
 
     //configure PB0 and PB1 to be receive and transmit respectively
     GPIO_PORTB_PCTL_R |= 0x11;
@@ -56,18 +57,17 @@ void uart_init(void){
 
     /*
      *     //integer baud rate register for uart1 (9,600) (16 MHz / (16 * 9,600))
-    UART1_IBRD_R  = 104;
+     UART1_IBRD_R  = 104;
 
-    //fractional baud rate register for uart1 (9,600)
-    UART1_FBRD_R = 11;
+     //fractional baud rate register for uart1 (9,600)
+     UART1_FBRD_R = 11;
      */
 
-
     //integer baud rate register for uart1 (115,200) (16 MHz / (16 * 115,200))
-    UART1_IBRD_R  = 8;
+    UART1_IBRD_R = 8;
 
     //fractional baud rate register for uart1 (115,200)
-    UART1_FBRD_R  = 44;
+    UART1_FBRD_R = 44;
 
     //configure line control
     UART1_LCRH_R = 0x60;
@@ -78,7 +78,6 @@ void uart_init(void){
     //enable uart1
     UART1_CTL_R |= UART_CTL_RXE | UART_CTL_TXE | UART_CTL_UARTEN;
 
-
     initialized = 1;
 
 }
@@ -86,7 +85,8 @@ void uart_init(void){
 /*
  * Sets up UART1 to use interrupts
  */
-void init_uart1_int(char *char_tracker) {
+void init_uart1_int(char *char_tracker)
+{
     // Initialize UART1
     uart_init();
 
@@ -106,10 +106,12 @@ void init_uart1_int(char *char_tracker) {
 /*
  * sends a character over the uart port to the putty terminal
  */
-void uart_sendChar(char data){
+void uart_sendChar(char data)
+{
 
     //wait until there is room to send data
-    while(UART1_FR_R & 0x20){
+    while (UART1_FR_R & 0x20)
+    {
     }
 
     //send data
@@ -119,10 +121,12 @@ void uart_sendChar(char data){
 /*
  * receives a character in the uart port
  */
-char uart_receive(void){
+char uart_receive(void)
+{
     char received;
 
-    while(!(UART1_FR_R & BIT6)){
+    while (!(UART1_FR_R & BIT6))
+    {
     }
 
     received = (char) UART1_DR_R & 0xFF;
@@ -133,11 +137,27 @@ char uart_receive(void){
 /*
  * handles the uart1 interrupt
  */
-void uart1_handler(){
+void uart1_handler()
+{
     *received_char = (char) UART1_DR_R & 0xFF;
 
     UART1_ICR_R |= UART_ICR_RXIC;
 }
 
+/**
+ * @brief sends an entire string of characters over UART1 module
+ * @param data pointer to the first index of the string to be sent
+ */
+void uart_sendStr(const char *data)
+{
+    //until we reach a null character
+    while (*data != '\0')
+    {
+        //send the current character
+        uart_sendChar(*data);
+        // increment the pointer.
+        data++;
+    }
 
+}
 

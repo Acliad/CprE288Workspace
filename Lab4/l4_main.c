@@ -30,6 +30,7 @@ int main(void)
     // Initialize UART1 using interrupts. Pass address of our char variable
     init_uart1_int(&received);
 
+
     while (1)
     {
         if (received) // True when an interrupt triggered and set received to a value
@@ -61,16 +62,16 @@ int main(void)
     }
 
 
-    /* Parts 1 and 2
+    //Parts 1 and 2
 
+    /*
     while (1)
     {
 
         //if we aren't at the BUFFER_SIZEth character
-        if (index != BUFFER_SIZE)
+        if (index < BUFFER_SIZE)
         {
             received = uart_receive();
-
         }
 
         //if the most recent character is return, or we are at the BUFFER_SIZEth character
@@ -85,7 +86,7 @@ int main(void)
             index++;
         }
     }
-     */
+    */
 
     return 0;
 }
