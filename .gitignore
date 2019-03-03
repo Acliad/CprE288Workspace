@@ -3,6 +3,7 @@
 .metadata/
 RemoteSystemsTempFiles/
 
+.ccsproject
 Debug/
 targetConfigs/
 tm4c123gh6pm.cmd
@@ -34,8 +35,7 @@ local.properties
 *.pydevproject
 
 # CDT-specific (C/C++ Development Tooling)
-# Need this for importing projects
-#.cproject
+.cproject
 
 # Java annotation processor (APT)
 .factorypath
@@ -64,9 +64,8 @@ local.properties
 .worksheet
 
 ### Eclipse Patch ###
-# Eclipse Core
-# Needed to import projects		
-#.project
+# Eclipse Core		
+.project
 
 # JDT-specific (Eclipse Java Development Tools)		
 .classpath

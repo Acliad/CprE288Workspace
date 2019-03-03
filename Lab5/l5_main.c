@@ -4,15 +4,13 @@
 
 #define BUFFER_SIZE 20
 
-//
-void printChars(int index, char *arr);
-
 /**
- * l4_main.c
+ * 54_main.c
  *
- * Lab 4 UART transmit and receive
+ * Lab 5: Lab to start learning about reading and analyzing data from an ADC source
+ *
  * @author jmartin3, irex
- * @date  Feb, 22, 2019
+ * @date  Mar, 1, 2019
  */
 int main(void)
 {
@@ -20,7 +18,7 @@ int main(void)
     //Initialize the LCD. This also clears the screen
     lcd_init();
     // Initialize UART1 using interrupts. Pass address of our char variable
-    init_uart1_int(&received);
+    uart_init(115200);
 
     const char *data1 = "dataset1.csv";
     const char *data2 = "dataset2.csv";
@@ -38,7 +36,7 @@ int main(void)
     // send the header
     uart_sendStr(line);
     // Grab all the data
-    get_reading(data1, data);
+    get_reading(data3, data);
 
     for (index = 0; index < sizeof(data)/sizeof(struct reading); index++)
     {

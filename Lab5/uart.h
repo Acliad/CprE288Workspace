@@ -17,7 +17,7 @@
 #include "driverlib/interrupt.h"
 
 //sets up the uart ports
-void uart_init(void);
+void uart_init(int baud_rate);
 
 //sends a character over the uart port
 void uart_sendChar(char data);
@@ -29,7 +29,7 @@ char uart_receive(void);
 void uart1_handler();
 
 //initialize uart1 to handle interrupts
-void init_uart1_int(char *char_tracker);
+void init_uart1_int(int baud_rate, char *char_tracker);
 
 // Takes a C string and sends it over UART. Null terminated.
 void uart_sendStr(const char *data);

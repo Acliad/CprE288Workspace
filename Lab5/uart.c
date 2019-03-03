@@ -19,9 +19,10 @@ volatile char *received_char;
 #define BIT5        0x20
 #define BIT6        0x40
 #define BIT7        0x80
+#define UART_CLK_SPD 16000000
 
 //sets up the uart ports
-void uart_init(void)
+void uart_init(int baud_rate)
 {
     static uint8_t initialized = 0;
 
@@ -30,6 +31,10 @@ void uart_init(void)
     {
         return;
     }
+
+    float baud_rate_divisor = UART_CLK_SPD/(16.00000 * baud_rate);
+    int decimal_rate = (int) baud_rate_divisor;
+    int fract_rate = (int) ((baud_rate_divisor - decimal_rate) * 64 + 0.5);
 
     //enable clock to uart1 module
     SYSCTL_RCGCUART_R |= BIT1;
@@ -55,19 +60,11 @@ void uart_init(void)
     //disable uart before configuration
     UART1_CTL_R &= ~(BIT0);
 
-    /*
-     *     //integer baud rate register for uart1 (9,600) (16 MHz / (16 * 9,600))
-     UART1_IBRD_R  = 104;
+    //integer baud rate register for uart1 (16 MHz / (16 * baud_rate))
+    UART1_IBRD_R = decimal_rate;
 
-     //fractional baud rate register for uart1 (9,600)
-     UART1_FBRD_R = 11;
-     */
-
-    //integer baud rate register for uart1 (115,200) (16 MHz / (16 * 115,200))
-    UART1_IBRD_R = 8;
-
-    //fractional baud rate register for uart1 (115,200)
-    UART1_FBRD_R = 44;
+    //fractional baud rate register for uart1 (fract_brd * 64 + 0.5)
+    UART1_FBRD_R = fract_rate;
 
     //configure line control
     UART1_LCRH_R = 0x60;
@@ -85,10 +82,10 @@ void uart_init(void)
 /*
  * Sets up UART1 to use interrupts
  */
-void init_uart1_int(char *char_tracker)
+void init_uart1_int(int baud_rate, char *char_tracker)
 {
     // Initialize UART1
-    uart_init();
+    uart_init(baud_rate);
 
     // Get the address of the given variable for putting in the char data
     received_char = char_tracker;
