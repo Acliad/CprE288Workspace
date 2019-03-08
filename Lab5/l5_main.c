@@ -38,6 +38,8 @@ int main(void)
     // Grab all the data
     get_reading(data3, data);
 
+
+    //Prints all of the data one line at a time, properly formatted
     for (index = 0; index < sizeof(data)/sizeof(struct reading); index++)
     {
         sprintf(line, "%-20d%-20f%-20f\r\n", index, data[index].ir_distance,
