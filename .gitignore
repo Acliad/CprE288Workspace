@@ -8,6 +8,7 @@ Debug/
 targetConfigs/
 tm4c123gh6pm.cmd
 tm4c123gh6pm_startup_ccs.c
+inc/
 
 # Created by https://www.gitignore.io/api/eclipse
 
