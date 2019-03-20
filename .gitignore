@@ -1,3 +1,7 @@
+#OS Files
+.vscode
+.DS_Store
+
 #CCS Files
 .jxbrowser-data/
 .metadata/
