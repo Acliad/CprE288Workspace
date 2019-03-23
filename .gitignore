@@ -1,6 +1,7 @@
 #OS Files
-.vscode
+.vscode/
 .DS_Store
+.gitconfig
 
 #CCS Files
 .jxbrowser-data/

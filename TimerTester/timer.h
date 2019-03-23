@@ -2,18 +2,16 @@
  * timer.h
  *
  *  Created on: Mar 15, 2019
- *      Author: irex
+ *      @author Isaac Rex
  */
 
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include <inc/tm4c123gh6pm.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "driverlib/interrupt.h"
-
-
+#include <inc/tm4c123gh6pm.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @brief Initialize and start the clock at 0. If the clock is
@@ -45,35 +43,34 @@ void timer_resumeCounter(void);
  * @brief Returns the number milliseconds that have passed since startClock()
  * was called. Value rolls over after about 49 days.
  *
- * @return unsigned int number of milliseconds since startClock() was called
+ * @return unsigned int number of milliseconds since a call to
+ * timer_startClock()
  */
 unsigned int timer_getMillis(void);
 
 /**
- * @brief Returns the number of microseconds passed since startClock() was
- * called. Value rolls over after about 71 minutes. Resolution is about TODO:
- * calculate resoultion
+ * @brief Returns the number of microseconds passed since a call to
+ * startClock(). Value rolls over after about 71 minutes.
  *
- * @return unsigned int number of microseconds since startClock() was called
+ * @return unsigned int number of microseconds since a call to startClock()
  */
 unsigned int timer_getMicros(void);
 
 /**
- * @brief Pauses the program for the specified number of milliseconds. Maximum
- * pause length is TODO: calculate
+ * @brief Pauses the program for the specified number of milliseconds.
  *
  * @param delay_time number of milliseconds to pause for
  */
-void timer_delayMillis(unsigned int delay_time);
+void timer_waitMillis(unsigned int delay_time);
 
 /**
- * @brief Pauses the program for the specifeid number of milliseconds. Maximum
- * pause length is TODO: calculate
+ * @brief Pauses the program for the specifeid number of microseconds.
  *
  * @param delay_time number of microseconds to pause for
  */
-void timer_delayMicros(unsigned int delay_time);
+void timer_waitMicros(unsigned int delay_time);
 
+// TODO: Implement
 /**
  * @brief Sets up an interrupt to call the given function once every given
  * milliseconds. Uses TIMER4 for the countdown. Function f executes inside an
@@ -85,6 +82,7 @@ void timer_delayMicros(unsigned int delay_time);
  */
 void timer_fireEvery(void (*f)(void), int millis);
 
+// TODO: Implement
 /**
  * @brief Sets up an interrupt to call the given function after the given number
  * of milliseconds. Uses TIMER4 for the countdown, and thus can only be used
@@ -96,6 +94,7 @@ void timer_fireEvery(void (*f)(void), int millis);
  */
 void timer_fireOnce(void (*f)(void), int millis);
 
+// TODO: Implement
 /**
  * @brief Sets up an interrupt to call the given function after the given number
  * of milliseconds for the given number of times. Uses TIMER4 for the countdown,
@@ -110,7 +109,7 @@ void timer_fireOnce(void (*f)(void), int millis);
 void timer_fireFor(void (*f)(void), int millis, int times);
 
 /**
- * @brief ISR handler to increment the _clock_ticks variable for tracking
+ * @brief ISR handler to increment the timeout variable for tracking total
  * milliseconds
  *
  */

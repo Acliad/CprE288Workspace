@@ -91,27 +91,13 @@ void timer_fireEvery(void (*f)(void), int millis);
 /**
  * @brief Sets up an interrupt to call the given function after the given number
  * of milliseconds. Uses TIMER4 for the countdown, and thus can only be used
- * when timer_fireEvery() and timer_fireFor() are not being used. Function f
+ * when timer_fireEvery() is not being used. Function f
  * executes inside an ISR and should be kept as short as possible.
  *
  * @param f the function to call
  * @param millis milliseconds until call
  */
 void timer_fireOnce(void (*f)(void), int millis);
-
-/**
- * @brief Sets up an interrupt to call the given function after the given number
- * of milliseconds for the given number of times. Uses TIMER4 for the countdown,
- * and thus can only be used when fireOnce() and fireEvery() are not being used.
- * Function f executes inside an ISR and should be kept as short as possible.
- * Maximum interval time is TODO: calculate
- *
- * @param f the function to call
- * @param millis milliseconds until call
- * @param times number of times to call f
- */
-void timer_fireFor(void (*f)(void), int millis, int times);
-
 /**
  * @brief ISR handler to increment the _clock_ticks variable for tracking
  * milliseconds

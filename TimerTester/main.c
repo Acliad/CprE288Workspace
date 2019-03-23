@@ -6,13 +6,12 @@
  * @author jmartin3, irex
  * @date  Mar, 15, 2019
  */
-#include <inc/tm4c123gh6pm.h>
+#include "lcd.h"
 #include "timer.h"
 #include "timer_eric.h"
-#include "lcd.h"
+#include <inc/tm4c123gh6pm.h>
 
-int main(void)
-{
+int main(void) {
     // Enable clock to port A
     SYSCTL_RCGCGPIO_R |= 0x01;
 
@@ -24,11 +23,20 @@ int main(void)
 
     // Start the clock
     timer_startCounter();
-//    lcd_init();
+    //    lcd_init();
 
-    while(1) {
-        GPIO_PORTA_DATA_R ^= 0x04;
-//        lcd_printf("%d", timer_getMillis());
-        timer_delayMillis(500);
-    }
+    unsigned int last_update = 0;
+    unsigned int current_time = 0;
+    while (1) {
+
+    //    GPIO_PORTA_DATA_R ^= 0x04;
+    //    timer_delayMicros(20);
+
+        /*** Testing timer_getMicros() ***/
+         current_time = timer_getMicros();
+         if (current_time - last_update >= 15000) {
+             last_update = timer_getMicros();
+             GPIO_PORTA_DATA_R ^= 0x04;
+         }
+     }
 }
