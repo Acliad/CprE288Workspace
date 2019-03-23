@@ -6,9 +6,7 @@
  * @author jmartin3, irex
  * @date  Mar, 15, 2019
  */
-#include "lcd.h"
 #include "timer.h"
-#include "timer_eric.h"
 #include <inc/tm4c123gh6pm.h>
 
 int main(void) {
@@ -29,14 +27,14 @@ int main(void) {
     unsigned int current_time = 0;
     while (1) {
 
-    //    GPIO_PORTA_DATA_R ^= 0x04;
-    //    timer_delayMicros(20);
+       GPIO_PORTA_DATA_R ^= 0x04;
+       timer_waitMillis(100);
 
         /*** Testing timer_getMicros() ***/
-         current_time = timer_getMicros();
-         if (current_time - last_update >= 15000) {
-             last_update = timer_getMicros();
-             GPIO_PORTA_DATA_R ^= 0x04;
-         }
+        //  current_time = timer_getMicros();
+        //  if (current_time - last_update >= 15000) {
+        //      last_update = timer_getMicros();
+        //      GPIO_PORTA_DATA_R ^= 0x04;
+        //  }
      }
 }

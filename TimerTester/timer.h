@@ -8,10 +8,11 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include "driverlib/interrupt.h"
-#include <inc/tm4c123gh6pm.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "driverlib/interrupt.h"
+#include <inc/tm4c123gh6pm.h>
+
 
 /**
  * @brief Initialize and start the clock at 0. If the clock is
