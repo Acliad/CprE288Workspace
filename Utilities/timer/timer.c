@@ -12,7 +12,7 @@
 #include "timer.h"
 
 // 65000 gives a countdown time of exactly 65ms TODO: is it 65000 or 64999?
-#define MICROS_PER_TICK 64999UL // Number of microseconds in one timer cycle
+#define MICROS_PER_TICK 65000UL // Number of microseconds in one timer cycle
 
 /**
  * @brief Tracks if the clock is currently running or stopped
@@ -37,7 +37,7 @@ void timer_init(void) {
         TIMER4_CTL_R &= ~TIMER_CTL_TAEN;           // Disable TIMER4 for setup
         TIMER4_CFG_R = TIMER_CFG_16_BIT;           // Set as 16-bit timer
         TIMER4_TAMR_R = TIMER_TAMR_TAMR_PERIOD;    // Periodic, countdown mode
-        TIMER4_TAILR_R = MICROS_PER_TICK;          // Countdown time of 65ms
+        TIMER4_TAILR_R = MICROS_PER_TICK - 1;      // Countdown time of 65ms
         TIMER4_ICR_R |= TIMER_ICR_TATOCINT; // Clear timeout interrupt status
         TIMER4_TAPR_R = 0x0F;               // 15 gives a period of 1us
         TIMER4_IMR_R |= TIMER_IMR_TATOIM;   // Allow TIMER4 timeout interrupts
