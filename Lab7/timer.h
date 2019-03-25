@@ -18,26 +18,26 @@
  * already running on a call, reset the time count back to 0. Uses TIMER5.
  *
  */
-void timer_startCounter(void);
+void timer_init(void);
 
 /**
  * @brief Stop the clock and free up TIMER5. Resets the value returned by
  * getMillis() and get Micros().
  *
  */
-void timer_stopCounter(void);
+void timer_stop(void);
 
 /**
  * @brief Pauses the clock at the current value.
  *
  */
-void timer_pauseCounter(void);
+void timer_pause(void);
 
 /**
  * @brief Resumes the clock after a call to pauseClock().
  *
  */
-void timer_resumeCounter(void);
+void timer_resume(void);
 
 /**
  * @brief Returns the number milliseconds that have passed since startClock()
@@ -57,14 +57,14 @@ unsigned int timer_getMillis(void);
 unsigned int timer_getMicros(void);
 
 /**
- * @brief Pauses the program for the specified number of milliseconds.
+ * @brief Pauses execution for the specifeid number of microseconds.
  *
- * @param delay_time number of milliseconds to pause for
+ * @param delay_time number of microseconds to pause for
  */
 void timer_waitMillis(unsigned int delay_time);
 
 /**
- * @brief Pauses the program for the specifeid number of microseconds.
+ * @brief Pauses execution for the specifeid number of microseconds.
  *
  * @param delay_time number of microseconds to pause for
  */

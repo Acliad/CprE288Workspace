@@ -17,8 +17,9 @@
 #define BIT7 0x80
 #define PB3 BIT3
 
-uint16_t *ptr_pulsewidth;
-uint8_t rising_edge; // Track if the last interrupt was a rising or falling edge
+unsigned int *ptr_pulsewidth;
+unsigned char
+    rising_edge; // Track if the last interrupt was a rising or falling edge
 
 // TODO: Add brief
 void ping_init(volatile unsigned int *ptr) {
@@ -110,10 +111,11 @@ void ping_captureHandler(void) {
             unsigned int current_time = TIMER3_TBR_R;
             // Check for timer overflow
             if (current_time < capture_time) {
+                *ptr_pulsewidth = current_time + (2 ^ 24 - capture_time);
                 num_overflows++;
+            } else {
+                *ptr_pulsewidth = current_time - capture_time;
             }
-
-            *ptr_pulsewidth = TIMER3_TBR_R - capture_time;
             rising_edge = 1; // Next trigger will be a rising edge
         }
     }
