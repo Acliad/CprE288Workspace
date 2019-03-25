@@ -107,14 +107,14 @@ void ping_captureHandler(void) {
             capture_time = TIMER3_TBR_R;
             rising_edge = 0; // Next trigger will be a falling edge
         } else {
+            unsigned int current_time = TIMER3_TBR_R;
+            // Check for timer overflow
+            if (current_time < capture_time) {
+                num_overflows++;
+            }
+
             *ptr_pulsewidth = TIMER3_TBR_R - capture_time;
             rising_edge = 1; // Next trigger will be a rising edge
         }
-        //TODO: Remove
-        if (TIMER3_RIS_R & TIMER_RIS_TBMRIS) {
-            TIMER3_ICR_R |= TIMER_ICR_TBMCINT;
-            num_overflows++;
-        }
-        
     }
 }
