@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <inc/tm4c123gh6pm.h>
-#include "timer._erich"
+#include "timer.h"
 
 /// Initialize PORTB0:6 to Communicate with LCD
 void lcd_init(void);

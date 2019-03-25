@@ -6,6 +6,9 @@
  *      Adapted from (and compatible with) Eric Middleton's timer utility
  */
 
+// TODO: Check value of MICROS_PER_TICK
+// TODO: Change timers back to TIMER5
+
 #include "timer.h"
 
 // 65000 gives a countdown time of exactly 65ms TODO: is it 65000 or 64999?
@@ -15,72 +18,37 @@
  * @brief Tracks if the clock is currently running or stopped
  *
  */
-uint8_t _running = 0;
+unsigned char _running = 0;
 
 /**
  * @brief Tracks the number of milliseconds passed since a call to startClock()
  *
  */
-volatile uint32_t _timeout_ticks;
+volatile unsigned int _timeout_ticks;
 
 /**
  * @brief Initialize and start the clock at 0. If the clock is
  * already running on a call, reset the time count back to 0. Uses TIMER4.
  *
  */
-void timer_startCounter(void) {
+void timer_init(void) {
     if (!_running) {
-        // Turn on clock to TIMER4
-        SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R4;
+        SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R4; // Turn on clock to TIMER4
+        TIMER4_CTL_R &= ~TIMER_CTL_TAEN;           // Disable TIMER4 for setup
+        TIMER4_CFG_R = TIMER_CFG_16_BIT;           // Set as 16-bit timer
+        TIMER4_TAMR_R = TIMER_TAMR_TAMR_PERIOD;    // Periodic, countdown mode
+        TIMER4_TAILR_R = MICROS_PER_TICK;          // Countdown time of 65ms
+        TIMER4_ICR_R |= TIMER_ICR_TATOCINT; // Clear timeout interrupt status
+        TIMER4_TAPR_R = 0x0F;               // 15 gives a period of 1us
+        TIMER4_IMR_R |= TIMER_IMR_TATOIM;   // Allow TIMER4 timeout interrupts
+        NVIC_PRI17_R |= NVIC_PRI17_INTC_M;  // Priority 7 (lowest)
+        NVIC_EN2_R |= (1 << 6);             // Enable TIMER4 interrupts
 
-        // Disable TIMER4 for setup
-        TIMER4_CTL_R &= ~TIMER_CTL_TAEN;
+        IntRegister(INT_TIMER4A, timer_clockTickHandler); // Bind the ISR
+        TIMER4_CTL_R |= TIMER_CTL_TAEN; // Start TIMER4 counting
 
-        // Set as 16-bit timer
-        TIMER4_CFG_R = TIMER_CFG_16_BIT;
-
-        // Configure for periodic, countdown mode
-        TIMER4_TAMR_R = TIMER_TAMR_TAMR_PERIOD;
-
-        // Set the initial timer value to have a countdown time of exactly
-        // 65ms
-        TIMER4_TAILR_R = MICROS_PER_TICK; // TODO: is it 65000 or 6499?
-
-        // Ensure the interrupt status register is cleared
-        TIMER4_ICR_R |= TIMER_ICR_TATOCINT;
-
-        // Set the prescaler to 15 to give a period of 1us
-        TIMER4_TAPR_R = 0x0F;
-
-        // Allow interrupts from TIMER4 timeout
-        TIMER4_IMR_R |= TIMER_IMR_TATOIM;
-
-        // Set the priority of the interrupt to 7 (lowest)
-        NVIC_PRI17_R |= NVIC_PRI17_INTC_M;
-
-        // Turn on interrupts from TIMER4 (interrupt number 70)
-        NVIC_EN2_R |= (1 << 6);
-
-        // Bind the ISR to the interrupt vector
-        IntRegister(INT_TIMER4A, timer_clockTickHandler);
-
-        // Start TIMER4 counting
-        TIMER4_CTL_R |= TIMER_CTL_TAEN;
-    } else { // Reset the timer to 0
-        // Stop the timer counting
-        TIMER4_CTL_R &= ~TIMER_CTL_TAEN;
-
-        // Reset _timeout_ticks
-        _timeout_ticks = 0;
-
-        // Set TIMER4 back to the top
-        TIMER4_TAV_R = MICROS_PER_TICK;
-
-        // Restart the timer
-        TIMER4_CTL_R |= TIMER_CTL_TAEN;
+        _running = 1;
     }
-
-    _running = 1;
 }
 
 /**
@@ -88,19 +56,11 @@ void timer_startCounter(void) {
  * timer_getMillis() and timer_getMicros().
  *
  */
-void timer_stopCounter(void) {
-    // Disable TIMER4
-    TIMER4_CTL_R &= ~TIMER_CTL_TAEN;
-
-    // Reset _timeout_ticks
-    _timeout_ticks = 0;
-
-    // Set TIMER4 back to the top
-    TIMER4_TAV_R = MICROS_PER_TICK;
-
-    // Turn off clock to TIMER4
-    SYSCTL_RCGCTIMER_R &= ~SYSCTL_RCGCTIMER_R5;
-
+void timer_stop(void) {
+    TIMER4_CTL_R &= ~TIMER_CTL_TAEN;            // Disable TIMER4
+    _timeout_ticks = 0;                         // Reset tick counter
+    TIMER4_TAV_R = MICROS_PER_TICK;             // Set TIMER4 back to the top
+    SYSCTL_RCGCTIMER_R &= ~SYSCTL_RCGCTIMER_R5; // Turn off clock to TIMER4
     _running = 0;
 }
 
@@ -108,10 +68,8 @@ void timer_stopCounter(void) {
  * @brief Pauses the clock at the current value.
  *
  */
-void timer_pauseCounter(void) {
-    // Disable TIMER4
-    TIMER4_CTL_R &= ~TIMER_CTL_TAEN;
-
+void timer_pause(void) {
+    TIMER4_CTL_R &= ~TIMER_CTL_TAEN; // Disable TIMER4
     _running = 0;
 }
 
@@ -119,10 +77,8 @@ void timer_pauseCounter(void) {
  * @brief Resumes the clock after a call to pauseClock().
  *
  */
-void timer_resumeCounter(void) {
-    // Enable TIMER4
-    TIMER4_CTL_R |= TIMER_CTL_TAEN;
-
+void timer_resume(void) {
+    TIMER4_CTL_R |= TIMER_CTL_TAEN; // Enable TIMER4
     _running = 1;
 }
 
@@ -134,8 +90,23 @@ void timer_resumeCounter(void) {
  * timer_startClock()
  */
 unsigned int timer_getMillis(void) {
-    // Adding 500 helps account for rounding errors
-    return (timer_getMicros() + 500) / 1000;
+    unsigned int ticks;
+    unsigned int millis;
+
+    TIMER4_IMR_R &= ~TIMER_IMR_TATOIM; // Disable timeout interrupts
+
+    millis = (MICROS_PER_TICK - TIMER4_TAR_R & 0xFFFF) / 1000;
+    if (TIMER4_RIS_R & TIMER_RIS_TATORIS) {
+        // If the timer overflows while we're getting the time
+        ticks = (_timeout_ticks + 1);
+        millis = 0;
+    } else {
+        ticks = _timeout_ticks;
+    }
+
+    TIMER4_IMR_R |= TIMER_IMR_TATOIM; // Reenable interrupts from TIMER timeout
+
+    return ticks * (MICROS_PER_TICK / 1000) + millis;
 }
 
 /**
@@ -148,10 +119,8 @@ unsigned int timer_getMicros(void) {
     unsigned int ticks;
     unsigned int micros;
 
-    // Disable interrupts while we get the values
-    TIMER4_IMR_R &= ~TIMER_IMR_TATOIM;
+    TIMER4_IMR_R &= ~TIMER_IMR_TATOIM; // Disable TIMER4 timeout interrupts
 
-    // Get the number of microseconds currently in TIMER4
     micros = MICROS_PER_TICK - TIMER4_TAR_R & 0xFFFF;
 
     if (TIMER4_RIS_R & TIMER_RIS_TATORIS) {
@@ -162,14 +131,13 @@ unsigned int timer_getMicros(void) {
         ticks = _timeout_ticks;
     }
 
-    // Reenable interrupts from TIMER timeout
-    TIMER4_IMR_R |= TIMER_IMR_TATOIM;
+    TIMER4_IMR_R |= TIMER_IMR_TATOIM; // Reenable TIMER4 interrupts
 
     return ticks * MICROS_PER_TICK + micros;
 }
 
 /**
- * @brief Pauses the program for the specifeid number of microseconds.
+ * @brief Pauses execution for the specifeid number of microseconds.
  *
  * @param delay_time number of microseconds to pause for
  */
@@ -201,9 +169,9 @@ void timer_waitMicros(unsigned int delay_time) {
 }
 
 /**
- * @brief Pauses the program for the specified number of milliseconds.
+ * @brief Pauses execution for the specified number of microseconds.
  *
- * @param delay_time number of milliseconds to pause for
+ * @param delay_time number of microseconds to pause for
  */
 void timer_waitMillis(unsigned int delay_time) {
     unsigned int start = timer_getMicros();
@@ -211,7 +179,7 @@ void timer_waitMillis(unsigned int delay_time) {
 
     while (delay_time > 0) {
         current_micros = timer_getMicros();
-        // Use a while loop in case a long ISR is called
+        // Uses a while loop (instead of if) in case a long ISR is called
         while (delay_time > 0 && ((current_micros - start) >= 1000)) {
             delay_time--;
             start += 1000;
@@ -226,7 +194,6 @@ void timer_waitMillis(unsigned int delay_time) {
  *
  */
 static void timer_clockTickHandler() {
-    // Clear interrupt flag
-    TIMER4_ICR_R |= TIMER_ICR_TATOCINT;
+    TIMER4_ICR_R |= TIMER_ICR_TATOCINT; // Clear interrupt flag
     _timeout_ticks++;
 }

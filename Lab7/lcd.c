@@ -156,7 +156,7 @@ void lcd_sendCommand(uint8_t data)
 	//Send High nibble
 	lcd_sendNibble(data >> 4);
 
-	timer_waitMicros(1);
+	timer_waitMicros(2);
 	//Send Lower Nibble
 	lcd_sendNibble(data & 0x0F);
 
@@ -165,6 +165,7 @@ void lcd_sendCommand(uint8_t data)
 }
 
 
+//TODO: Check delay times
 ///Send 4bit nibble to lcd, then clear port.
 void lcd_sendNibble(uint8_t theNibble)
 {
@@ -172,11 +173,11 @@ void lcd_sendNibble(uint8_t theNibble)
 	LCD_PORT_DATA |= (theNibble & 0x0F) << 1; //PORTD1:4
 
 	//Data Hold time before Clock = 40ns -- Change if faster clock
-	timer_waitMicros(10);
+	timer_waitMicros(18);
 	//Clock in Data
 	LCD_PORT_CNTRL &= ~(EN_PIN);
 
-	timer_waitMicros(10);
+	timer_waitMicros(18);
 	//Clear Port
 	LCD_PORT_DATA &= ~((0x0F) << 1);
 }

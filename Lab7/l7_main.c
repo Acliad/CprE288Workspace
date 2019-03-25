@@ -7,16 +7,34 @@
  * @date  Mar, 15, 2019
  */
 #include "lcd.h"
-#include <inc/tm4c123gh6pm.h>
 #include "ping.h"
+#include "timer.h"
+#include <inc/tm4c123gh6pm.h>
+
+// Convert the number of clock cycles (62.5ns per cycle) to ms
+#define CLK_CYCL_TO_MS(a) (a * 62.5 / 1e6)
+// Convert the number of clock cycles to cm based on speed of sound
+#define CLK_CYCL_TO_CM(a) (a * 62.5e-7 * 340)
+
+volatile unsigned int num_overflows;
 
 int main(void)
-
 {
-    ping_init();
+    volatile unsigned int pulsewidth = 0;
+    char msg[100];
+    timer_startCounter();
+    lcd_init();
+    ping_init(&pulsewidth);
 
-    while(1) {
+    while (1) {
         ping_read();
-        ping_delayMicros(1000000);
+        timer_waitMillis(300);
+        if (pulsewidth > 0) {
+            sprintf(msg, "Clock cycles: %d\nmilliseconds: %0.2f\nDistance: %0.2fcm\nOverflows: %d",
+                    pulsewidth, CLK_CYCL_TO_MS(pulsewidth),
+                    CLK_CYCL_TO_CM(pulsewidth), num_overflows);
+            lcd_printf(msg);
+            pulsewidth = 0;
+        }
     }
 }
