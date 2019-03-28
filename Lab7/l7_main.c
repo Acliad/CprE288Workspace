@@ -12,9 +12,9 @@
 #include <inc/tm4c123gh6pm.h>
 
 // Convert the number of clock cycles (62.5ns per cycle) to ms
-#define CLK_CYCL_TO_MS(a) (a / 2 * 62.5 * 1e-6)
+#define CLK_CYCL_TO_MS(a) (a * 62.5 * 1e-6)
 // Convert the number of clock cycles to cm based on speed of sound
-#define CLK_CYCL_TO_CM(a) (a / 2 * 62.5e-7 * 340)
+#define CLK_CYCL_TO_CM(a) (a / 2 * 62.5e-7 * 340 - 1)
 
 volatile unsigned int num_overflows;
 
@@ -30,7 +30,7 @@ int main(void)
         ping_read();
         timer_waitMillis(300);
         if (pulsewidth > 0) {
-            sprintf(msg, "Clock cycles: %d\nmilliseconds: %0.2f\nDistance: %0.2fcm\nOverflows: %d",
+            sprintf(msg, "CLK Cycles: %d\nmilliseconds: %0.2f\nDistance: %0.2fcm\nOverflows: %d",
                     pulsewidth, CLK_CYCL_TO_MS(pulsewidth),
                     CLK_CYCL_TO_CM(pulsewidth), num_overflows);
             lcd_printf(msg);

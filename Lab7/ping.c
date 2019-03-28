@@ -111,7 +111,7 @@ void ping_captureHandler(void) {
             unsigned int current_time = TIMER3_TBR_R;
             // Check for timer overflow
             if (current_time < capture_time) {
-                *ptr_pulsewidth = current_time + (2 ^ 24 - capture_time);
+                *ptr_pulsewidth = current_time + (2 ^ 24 - 1 - capture_time);
                 num_overflows++;
             } else {
                 *ptr_pulsewidth = current_time - capture_time;
