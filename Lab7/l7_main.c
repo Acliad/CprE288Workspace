@@ -29,6 +29,7 @@ int main(void)
     while (1) {
         ping_read();
         timer_waitMillis(300);
+
         if (pulsewidth > 0) {
             sprintf(msg, "CLK Cycles: %d\nmilliseconds: %0.2f\nDistance: %0.2fcm\nOverflows: %d",
                     pulsewidth, CLK_CYCL_TO_MS(pulsewidth),
