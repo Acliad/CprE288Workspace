@@ -64,6 +64,9 @@ void lcd_init(void)
 {
 	//TODO: Remove waitMillis after commands -- poll busy flag in sendCommand
 	volatile uint32_t i = 0;
+
+	timer_init();
+
 	SYSCTL_RCGCGPIO_R |= BIT3 | BIT5; //Turn on PORTD, PORTF sys clock
 
 	//Set port to output
@@ -156,7 +159,7 @@ void lcd_sendCommand(uint8_t data)
 	//Send High nibble
 	lcd_sendNibble(data >> 4);
 
-	timer_waitMicros(2);
+	timer_waitMicros(1);
 	//Send Lower Nibble
 	lcd_sendNibble(data & 0x0F);
 
@@ -165,7 +168,6 @@ void lcd_sendCommand(uint8_t data)
 }
 
 
-//TODO: Check delay times
 ///Send 4bit nibble to lcd, then clear port.
 void lcd_sendNibble(uint8_t theNibble)
 {
