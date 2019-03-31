@@ -28,8 +28,6 @@ volatile int *button_num_ptr;
 uint8_t prev_Button; // must be set yourself in button_getButton()
 uint8_t button;      // current button being pressed, must be set yourself in
                      // button_getButton()
-uint8_t
-    time_pressed; // Tracks the last time a button event happened for debouncing
 
 /**
  * Initialize PORTE and configure bits 0-5 to be used as inputs for the buttons.
@@ -53,7 +51,7 @@ void button_init() {
     SYSCTL_RCGCGPIO_R |= BIT4;
 
     // Set the buttons to inputs and enable
-    GPIO_PORTE_DIR_R &= 0x00;
+    GPIO_PORTE_DIR_R &= ~0x3F;
     // Pins used: PE0, PE1, PE2, PE3, PE4, PE5
     GPIO_PORTE_DEN_R |= 0b00111111;
 
@@ -73,18 +71,18 @@ void init_button_interrupts(int *button_event_addr, int *button_num_addr) {
     // Set up the GPIO pins
     button_init();
 
-    // Mask the bits for pins 0-5
-    GPIO_PORTE_IM_R &= 0b11000000;
+    // Disable interrupts on PB0-PB5 during setup
+    GPIO_PORTE_IM_R &= ~0x3F;
 
     // Set pins 0-5 to use edge sensing
     GPIO_PORTE_IS_R &= 0b11000000;
 
     // Set pins 0-5 to use both edges. We want to update the LCD
     // when a button is pressed, and when the button is released.
-    GPIO_PORTE_IBE_R |= 0b11111111;
+    GPIO_PORTE_IBE_R |= 0x3F;
 
     // Clear the interrupts
-    GPIO_PORTE_ICR_R = 0;
+    GPIO_PORTE_ICR_R |= 0x3F;
 
     // Unmask the bits for pins 0-5
     GPIO_PORTE_IM_R |= 0b00111111;
@@ -100,19 +98,22 @@ void init_button_interrupts(int *button_event_addr, int *button_num_addr) {
  * Handles a hardware interrupt that occurs from a button being pressed
  */
 void gpioe_handler() {
+    // Last time a button event happened for debouncing
+    static uint32_t last_time_pressed = 0;
+    uint32_t current_time = timer_getMillis();
 
     // Clear interrupt status register
     GPIO_PORTE_ICR_R = 0xFF;
+    uint8_t button_states = button_getButton();
 
-    if (timer_getMillis() - timer_pressed > DEBOUNCE_TIME) {
-        DEBOUNCE_TIME = timer_getMillis(); // Update last button press time
-
+    if (current_time - timer_pressed > DEBOUNCE_TIME) {
         // Set the button_event flag
         *button_event_ptr = 1;
         // Store the value of the highest button pressed at the given button_num
         // address
-        *button_num_ptr = button_getButton();
+        *button_num_ptr = button_states;
     }
+    last_time_pressed = current_time; // Update last button press time
 }
 
 /**
@@ -124,11 +125,14 @@ uint8_t button_checkButtons() {
 }
 
 /**
- * Returns the position of the leftmost button being pushed.
- * @return the position of the leftmost button being pushed. A 6 is the leftmost
- * button, 1 is the rightmost button. Return 0 if no button is being pressed.
+ * @brief Returns the position of the leftmost button being pushed. A 6 is the
+ * leftmost button, 1 is the rightmost button. Return 0 if no button is being
+ * pressed.
+ *
+ * @return the position of the leftmost button being pushed.
  */
 uint8_t button_getButton() {
+    //TODO: Implement debouncing
     int i;
     for (i = 5; i >= 0; i--) {
         // Check each bit from bit 5 to bit 0
