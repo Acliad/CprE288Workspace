@@ -103,10 +103,10 @@ void gpioe_handler() {
     uint32_t current_time = timer_getMillis();
 
     // Clear interrupt status register
-    GPIO_PORTE_ICR_R = 0xFF;
+    GPIO_PORTE_ICR_R = 0x3F;
     uint8_t button_states = button_getButton();
 
-    if (current_time - timer_pressed > DEBOUNCE_TIME) {
+    if (current_time - last_time_pressed > DEBOUNCE_TIME) {
         // Set the button_event flag
         *button_event_ptr = 1;
         // Store the value of the highest button pressed at the given button_num

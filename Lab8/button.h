@@ -13,7 +13,6 @@
 #include <inc/tm4c123gh6pm.h>
 #include <stdbool.h>
 #include "driverlib/interrupt.h"
-#include "timer.h"
 
 // initialize the push buttons
 void button_init();

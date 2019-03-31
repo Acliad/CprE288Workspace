@@ -15,7 +15,7 @@
 
 void servo_init(void);
 
-void servo_move(double degrees);
+int servo_move(double degrees);
 
 
 #endif /* SERVO_H_ */

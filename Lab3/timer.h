@@ -1,44 +1,118 @@
 /*
- * Timer.hpp
+ * timer.h
  *
- *  Created on: Mar 3, 2016
- *      Author: ericm
+ *  Created on: Mar 15, 2019
+ *      @author Isaac Rex
  */
 
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include <stdint.h>
-
-#define BIT0		0x01
-#define BIT1		0x02
-#define BIT2		0x04
-#define BIT3		0x08
-#define BIT4		0x10
-#define BIT5		0x20
-#define BIT6		0x40
-#define BIT7		0x80
-
-typedef uint32_t clock_t;
-
 #include <inc/tm4c123gh6pm.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include "driverlib/interrupt.h"
 
-extern volatile uint32_t _timer_ticks;
+/**
+ * @brief Initialize and start the clock at 0. If the clock is
+ * already running on a call, reset the time count back to 0. Uses TIMER5.
+ *
+ */
+void timer_init(void);
 
-void timer_waitMillis(uint32_t millis);
+/**
+ * @brief Stop the clock and free up TIMER5. Resets the value returned by
+ * getMillis() and get Micros().
+ *
+ */
+void timer_stop(void);
 
-void timer_waitMicros(uint16_t micros);
+/**
+ * @brief Pauses the clock at the current value.
+ *
+ */
+void timer_pause(void);
 
-void timer_startTimer(uint16_t startValue);
+/**
+ * @brief Resumes the clock after a call to pauseClock().
+ *
+ */
+void timer_resume(void);
 
-void timer_stopTimer(void);
+/**
+ * @brief Returns the number milliseconds that have passed since startClock()
+ * was called. Value rolls over after about 49 days.
+ *
+ * @return unsigned int number of milliseconds since a call to
+ * timer_startClock()
+ */
+unsigned int timer_getMillis(void);
 
-clock_t timer_startClock(void);
+/**
+ * @brief Returns the number of microseconds passed since a call to
+ * startClock(). Value rolls over after about 71 minutes.
+ *
+ * @return unsigned int number of microseconds since a call to startClock()
+ */
+unsigned int timer_getMicros(void);
 
-clock_t timer_getClock(void);
+/**
+ * @brief Pauses execution for the specifeid number of microseconds.
+ *
+ * @param delay_time number of microseconds to pause for
+ */
+void timer_waitMillis(unsigned int delay_time);
 
-void timer_stopClock(void);
+/**
+ * @brief Pauses execution for the specifeid number of microseconds.
+ *
+ * @param delay_time number of microseconds to pause for
+ */
+void timer_waitMicros(unsigned int delay_time);
 
+// TODO: Implement
+/**
+ * @brief Sets up an interrupt to call the given function once every given
+ * milliseconds. Uses TIMER4 for the countdown. Function f executes inside an
+ * ISR, so keep the passed function as short as possible. Maximum interval time
+ * is TODO: calculate
+ *
+ * @param f the function to call
+ * @param millis the interval between calls
+ */
+void timer_fireEvery(void (*f)(void), int millis);
+
+// TODO: Implement
+/**
+ * @brief Sets up an interrupt to call the given function after the given number
+ * of milliseconds. Uses TIMER4 for the countdown, and thus can only be used
+ * when timer_fireEvery() and timer_fireFor() are not being used. Function f
+ * executes inside an ISR and should be kept as short as possible.
+ *
+ * @param f the function to call
+ * @param millis milliseconds until call
+ */
+void timer_fireOnce(void (*f)(void), int millis);
+
+// TODO: Implement
+/**
+ * @brief Sets up an interrupt to call the given function after the given number
+ * of milliseconds for the given number of times. Uses TIMER4 for the countdown,
+ * and thus can only be used when fireOnce() and fireEvery() are not being used.
+ * Function f executes inside an ISR and should be kept as short as possible.
+ * Maximum interval time is TODO: calculate
+ *
+ * @param f the function to call
+ * @param millis milliseconds until call
+ * @param times number of times to call f
+ */
+void timer_fireFor(void (*f)(void), int millis, int times);
+
+/**
+ * @brief ISR handler to increment the timeout variable for tracking total
+ * milliseconds
+ *
+ */
+static void timer_clockTickHandler();
 
 #endif /* TIMER_H_ */

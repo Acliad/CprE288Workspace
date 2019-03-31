@@ -8,7 +8,10 @@
 #include "servo.h"
 #define PB5 0x20
 #define START_VAL 320000
-#define ZERO_DEG 304000
+// 304000 calculated, adjust as neccessary
+#define ZERO_DEG 311480
+#define ONE_EIGHTY_DEG 282440
+#define DEG_TO_MATCH_FACTOR ((ZERO_DEG - ONE_EIGHTY_DEG) / 180)
 
 void servo_init(void) {
     static uint8_t initialized = 0;
@@ -36,9 +39,13 @@ void servo_init(void) {
     initialized = 1;
 }
 
-void servo_move(double degrees) {
+//TODO: Add breif
+// Returns the 24-bit value in the match register
+int servo_move(double degrees) {
     // Map degrees to the range of match values
-    unsigned int new_match = ZERO_DEG - 88 * degrees;
+    unsigned int new_match = ZERO_DEG - DEG_TO_MATCH_FACTOR * degrees;
     TIMER1_TBPMR_R = (new_match >> 16) & 0xFF;       // Bits 17:24 of match value
     TIMER1_TBMATCHR_R = new_match & 0xFFFF;    // Lower 16 bits of the timer start value
+
+    return new_match & 0xFFFFFF;
 }
