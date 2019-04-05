@@ -63,5 +63,13 @@ int main(void) {
             }
             button_event = 0;
         }
+
+        // Set max and min ranges
+        if (degrees > 180) {
+            degrees = 180;
+        }
+        else if (degrees < 0) {
+            degrees = 0;
+        }
     }
 }
