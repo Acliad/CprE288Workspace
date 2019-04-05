@@ -16,6 +16,10 @@
 #define NUM_SAMPLES 50
 #define UPDATE_DELAY 10
 
+#define SCALAR 1.217e8
+#define EXP_CONSTANT -2.143
+#define Y_INTERCEPT 5
+
 float map_distance(int raw);
 
 
@@ -36,8 +40,11 @@ int main(void)
     adc_init();
     timer_startClock();
     uart_init(115200);
+    ADC0_SAC_R = 3;
+
 
     while(1){
+        /*
         // Subtracts the oldest data point from the total sum
         readings_sum -= ir_readings[index];
         // Gets the new data point and store in the array
@@ -49,6 +56,10 @@ int main(void)
 
         // Average of all points in readings array
         averaged_raw = readings_sum / NUM_SAMPLES;
+        */
+
+        averaged_raw = adc_read();
+
 
 
         // Delay for LCD
@@ -74,5 +85,5 @@ int main(void)
 
 // Maps the data points
 float map_distance(int raw) {
-    return (1.217e8)*pow(raw, -2.143) + 5;
+    return (SCALAR)*pow(raw, EXP_CONSTANT) + Y_INTERCEPT;
 }
