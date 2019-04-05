@@ -6,42 +6,40 @@
  * @author jmartin3, irex
  * @date  Mar, 29, 2019
  */
+#include "button.h"
 #include "lcd.h"
 #include "servo.h"
 #include "timer.h"
 #include <inc/tm4c123gh6pm.h>
-#include "button.h"
 
 #define MAX_DEG 180.00
 #define MIN_DEG 0.00
 
-int main(void)
-{
-    volatile int button_event = 0; // Boolean to track if a button was pressed or released
-    volatile int button_pressed = 0; // The highest button number that is currently pressed
+int main(void) {
+    volatile int button_event = 0;   // Track if button has been pressed
+    volatile int button_pressed = 0; // Highest butotn pressed
     int direction = 1; // Move clockwise (-1) or counterclockwise (1)
     float degrees = MAX_DEG / 2.00; // Start at 90 degrees
-    int register_val = 0; // Value in the timer match register (24 bits)
-    char str_buff[100]; // Buffer to hold the LCD output
-    char *rot_direc = "CCW"; // String for direction indication on LCD
+    int register_val = 0;       // Value in the timer match register (24 bits)
+    char str_buff[100];         // Buffer to hold the LCD output
+    char *rotation_dir_str = "CCW"; // String for direction indication on LCD
 
     init_button_interrupts(&button_event, &button_pressed);
     servo_init();
     lcd_init();
     timer_init();
 
-    while (1)
-    {
-        rot_direc = (direction > 0 ? "CCW" : "CW");
+    while (1) {
+        rotation_dir_str = (direction > 0 ? "CCW" : "CW");
         register_val = servo_move(degrees); // Update the servo
 
-        sprintf(str_buff, "Direction: %s\nMatch Value:%d\nDegrees: %.2f\nButton: %d", rot_direc, register_val, degrees, button_pressed);
+        sprintf(str_buff,
+                "Direction: %s\nMatch Value:%d\nDegrees: %.2f\nButton: %d",
+                rotation_dir_str, register_val, degrees, button_pressed);
         lcd_printf(str_buff); // Update the LCD
 
-        if (button_event)
-        {
-            switch (button_pressed)
-            {
+        if (button_event) {
+            switch (button_pressed) {
             case 1: // Button 1
                 degrees += 1.0 * direction;
                 break;
@@ -65,7 +63,5 @@ int main(void)
             }
             button_event = 0;
         }
-
     }
-
 }
