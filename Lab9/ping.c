@@ -17,17 +17,18 @@
 #define BIT7 0x80
 #define PB3 BIT3
 
-unsigned int *ptr_pulsewidth;
-unsigned char
-    rising_edge; // Track if the last interrupt was a rising or falling edge
+volatile unsigned int pulsewidth;
+unsigned char rising_edge; // Track if the last interrupt was a rising or falling edge
 
 // TODO: Add brief
-void ping_init(volatile unsigned int *ptr) {
+void ping_init(void)
+{
     static uint8_t initialized = 0;
-    ptr_pulsewidth = ptr;
+    pulsewidth = 0;
 
     // Check if already initialized
-    if (initialized) {
+    if (initialized)
+    {
         return;
     }
 
@@ -59,7 +60,8 @@ void ping_init(volatile unsigned int *ptr) {
 }
 
 // TODO: add brief
-void ping_read(void) {
+void ping_pulse(void)
+{
 
     // Disable the alternate function for PB3
     GPIO_PORTB_AFSEL_R &= ~PB3;
@@ -85,6 +87,9 @@ void ping_read(void) {
     // Enable alternate function on PB3
     GPIO_PORTB_AFSEL_R |= PB3;
 
+    // This added stability. Why?
+    timer_waitMicros(2);
+
     // Enable CCP mode on PB3
     GPIO_PORTB_PCTL_R |= 0x7000;
 
@@ -98,22 +103,44 @@ void ping_read(void) {
     TIMER3_IMR_R |= TIMER_IMR_CBEIM;
 }
 
+double ping_read(unsigned int max_dist)
+{
+    pulsewidth = 0;
+    ping_pulse();
+    while (pulsewidth == 0)
+    { // Wait for ping sensor reading to complete
+    }
+
+    unsigned int distance = pulsewidth / 2 * 62.5e-7 * 340 - 1;
+
+    // Returns 0 if the distance is out of the usable range
+    return (distance > max_dist ? 0 : distance);
+}
+
 // TODO: Add brief
-void ping_captureHandler(void) {
+void ping_captureHandler(void)
+{
     static unsigned int capture_time = 0;
     // If an edge event triggered this interrupt
-    if (TIMER3_MIS_R & TIMER_MIS_CBEMIS) {
+    if (TIMER3_MIS_R & TIMER_MIS_CBEMIS)
+    {
         TIMER3_ICR_R |= TIMER_ICR_CBECINT; // Clear the interrupt flag
-        if (rising_edge) {
+        if (rising_edge)
+        {
             capture_time = TIMER3_TBR_R;
             rising_edge = 0; // Next trigger will be a falling edge
-        } else {
+        }
+        else
+        {
             unsigned int current_time = TIMER3_TBR_R;
             // Check for timer overflow
-            if (current_time < capture_time) {
-                *ptr_pulsewidth = current_time + (16777215 - capture_time);
-            } else {
-                *ptr_pulsewidth = current_time - capture_time;
+            if (current_time < capture_time)
+            {
+                pulsewidth = current_time + (16777215 - capture_time);
+            }
+            else
+            {
+                pulsewidth = current_time - capture_time;
             }
             rising_edge = 1; // Next trigger will be a rising edge
         }

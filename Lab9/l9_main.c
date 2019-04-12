@@ -16,8 +16,7 @@
 #include "ping.h"
 #include "servo.h"
 
-#define NUM_SAMPLES 50
-#define CLK_CYCL_TO_CM(a) (a / 2 * 62.5e-7 * 340 - 1)
+#define NUM_SAMPLES 50.0000
 
 
 float map_distance(int raw);
@@ -25,25 +24,24 @@ float map_distance(int raw);
 // Used to hold a reading of IR and Sonar data
 typedef struct distance
 {
-    float ir_distance;
+    double ir_distance;
     double sonar_distance;
 } distance_t;
 
 int main(void)
 {
-    unsigned int pulse_width;
-    distance_t distances[90];
+    distance_t distances[91];
     int degree = 0;
     int servo_pos = 0;
     char line[40]; // Buffer for output data
-    unsigned int ir_avg_raw;
+    double ir_avg_raw;
 
     lcd_init();
     adc_init();
 //    adc_setAvg(6);
     timer_init();
     uart_init(115200); // 115200 buadrate for WiFi
-    ping_init(&pulse_width);
+    ping_init();
     servo_init();
 
     servo_move(servo_pos); // Set servo to begining of sweep
@@ -64,21 +62,16 @@ int main(void)
         unsigned int total = 0;
         for (i = 0; i < NUM_SAMPLES; i++)
         {
-            total += adc_read();
+            total += adc_read(80);
         }
         // Average of all points in readings array
         ir_avg_raw = total / NUM_SAMPLES;
         lcd_printf("IR (cm): %d", ir_avg_raw);
 
-        // Get sonar /data
-        ping_read();
-        while (pulse_width == 0) { // Wait for ping sensor reading to complete
-        }
-        distances[degree].sonar_distance = CLK_CYCL_TO_CM(pulse_width);
-        pulse_width = 0;
+        // Get sonar data
+        distances[degree].sonar_distance = ping_read(1000);
 
-
-        distances[degree].ir_distance = map_distance(ir_avg_raw); // Get IR data
+        distances[degree].ir_distance = ir_avg_raw; // Get IR data
 
         // Format and send distance data
         sprintf(line, "%-20d%-20f%-20f\r\n", degree * 2, distances[degree].ir_distance, distances[degree].sonar_distance);
@@ -86,7 +79,7 @@ int main(void)
 
         degree = (degree + 1) % 91;
         servo_move(degree * 2);
-        timer_waitMillis(25);
+        timer_waitMillis(20);
     }
 }
 
@@ -95,4 +88,6 @@ float map_distance(int raw)
 {
     return (1.217e8) * pow(raw, -2.143) + 5;
 }
+
+
 

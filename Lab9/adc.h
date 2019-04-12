@@ -21,9 +21,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inc/tm4c123gh6pm.h>
+#include <math.h>
+
 
 void adc_init(void);
 void adc_setAvg(int);
-int adc_read(void);
+double adc_read(double max_dist);
 
 #endif /* ADC_H_ */

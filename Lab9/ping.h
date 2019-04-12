@@ -15,10 +15,12 @@
 #include "driverlib/interrupt.h"
 
 
-void ping_init(volatile unsigned int *ptr);
+void ping_init(void);
 
-void ping_read(void);
+void ping_pulse(void);
 
 void ping_captureHandler(void);
+
+double ping_read(unsigned int max_dist);
 
 #endif /* PING_H_ */

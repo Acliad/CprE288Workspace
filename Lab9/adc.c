@@ -54,7 +54,7 @@ void adc_setAvg(int avg_rate) {
     }
 }
 
-int adc_read(void){
+double adc_read(double max_dist){
 
     //Initiate SS0 conversion sequence
     ADC0_PSSI_R = 0x1;
@@ -67,8 +67,12 @@ int adc_read(void){
     //Clear the raw interrupt status flag for SS0
     ADC0_ISC_R = BIT0;
 
-    //Return channel 10 from FIFO buffer
-    return ADC0_SSFIFO0_R;
+
+    // Map the timer value to distance
+    double distance = (1.217e8) * pow(ADC0_SSFIFO0_R, - 2.143) + 5;
+
+    // Return 0 if distance is outside usable range of IR sensor
+    return (distance > max_dist ? 0 : distance);
 }
 
 
