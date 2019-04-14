@@ -9,8 +9,8 @@
 #define PB5 0x20
 #define START_VAL 320000
 // 304000 calculated, adjust as neccessary
-#define ZERO_DEG 311480
-#define ONE_EIGHTY_DEG 282440
+#define ZERO_DEG 312687
+#define ONE_EIGHTY_DEG 284271
 #define DEG_TO_MATCH_FACTOR ((ZERO_DEG - ONE_EIGHTY_DEG) / 180)
 
 void servo_init(void) {

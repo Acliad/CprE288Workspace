@@ -6,7 +6,7 @@
  *      Author: jmartin3, irex
  */
 
-#include "adc.h"
+#include "ir.h"
 
 float coeff_A = 1.217e8;
 float coeff_B = -2.143;
@@ -94,7 +94,7 @@ double ir_readCM(double max_dist) {
   double distance = (coeff_A)*pow(ir_read(), coeff_B) + y_intercept;
 
   // Return 0 if distance is outside usable range of IR sensor
-  return (distance > max_dist ? 0 : distance);
+  return (distance > max_dist ? max_dist : distance);
 }
 
 /**

@@ -88,7 +88,7 @@ void ping_pulse(void)
     GPIO_PORTB_AFSEL_R |= PB3;
 
     // This added stability. Why?
-    timer_waitMicros(2);
+    timer_waitMicros(5);
 
     // Enable CCP mode on PB3
     GPIO_PORTB_PCTL_R |= 0x7000;
@@ -111,10 +111,10 @@ double ping_read(unsigned int max_dist)
     { // Wait for ping sensor reading to complete
     }
 
-    unsigned int distance = pulsewidth / 2 * 62.5e-7 * 340 - 1;
+    double distance = pulsewidth * 62.5e-9 * 34000 / 2.00 - 1.00;
 
     // Returns 0 if the distance is out of the usable range
-    return (distance > max_dist ? 0 : distance);
+    return (distance > max_dist ? max_dist : distance);
 }
 
 // TODO: Add brief

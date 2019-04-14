@@ -22,6 +22,7 @@
 #include <inc/tm4c123gh6pm.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 
 /**
  * @brief Sets up the infrared sensor.
