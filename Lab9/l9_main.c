@@ -16,7 +16,7 @@
 #include <inc/tm4c123gh6pm.h>
 #include <math.h>
 
-#define NUM_SAMPLES 10
+#define NUM_SAMPLES 20
 #define MAX_NUM_OBJECTS 10
 #define EDGE_THRESHOLD
 
@@ -24,7 +24,8 @@ typedef struct object
 {
     unsigned int start_i;
     unsigned int end_i;
-    unsigned int distance;
+    double distance;
+    double linear_width;
     unsigned int index;
 } object_t;
 
@@ -70,7 +71,14 @@ int main(void)
         ir_cm = ir_read_avgCM(85, NUM_SAMPLES);
         distances[degree].ir_distance = ir_cm; // Get IR data
 
-        lcd_printf("IR (cm): %.2f", ir_cm);
+        if (ir_cm < 75)
+        {
+            lcd_printf("Found object!");
+        }
+        else
+        {
+            lcd_printf("Searching...");
+        }
 
         // Get sonar data
         distances[degree].sonar_distance = ping_read(100);
@@ -83,7 +91,7 @@ int main(void)
 
         degree = (degree + 1); // % 91;
         servo_move(degree);
-        timer_waitMillis(1);
+        timer_waitMillis(5);
     }
     proccess_data(distances, 181);
 }
@@ -92,8 +100,9 @@ void proccess_data(distance_t data[], int length)
 {
     object_t object[MAX_NUM_OBJECTS] = { 0 };
     unsigned int object_num = 0;
-    unsigned int distance_sum = 0;
+    float distance_sum = 0;
     uint8_t processing = 0;
+    unsigned int smallest_index = 0;
 
     int i = 0;
     for (i = 0; i < length; i++)
@@ -115,24 +124,50 @@ void proccess_data(distance_t data[], int length)
             unsigned int num_samples = i - (object[object_num].start_i);
             if (num_samples > 0)
             {
-                object[object_num].distance = distance_sum / (num_samples);
+                float distance = distance_sum / (num_samples);
+                int ang_width = object[object_num].end_i - object[object_num].start_i;
+                // Calculate the linear width. The scaling factor of .3 * (0.032 * distance) was found experimentally
+                float linear_width = distance * ang_width * M_PI / 180.00 * .3
+                        * (0.032 * distance);
+                object[object_num].linear_width = linear_width;
+                object[object_num].distance = distance;
+
+                // TODO: Clean up
+                if (linear_width < object[smallest_index].linear_width)
+                {
+                    smallest_index = object_num;
+                }
+
                 object_num++;
             }
             distance_sum = 0;
         }
     }
 
-    i = 0;
-    while (1)
-    {
-        int object_index = object[i].index;
-        int ang_width = object[i].end_i - object[i].start_i;
-        float distance = object[i].distance;
-        float linear_width = distance * ang_width * M_PI / 180.00;
-        lcd_printf("Object #: %d\nAngular Width: %d\nWidth: %.2f\nDistance: %.2f", object_index,
-                   ang_width, linear_width, distance);
+    /*
+    int object_index = object[smallest_index].index;
+    int ang_width = object[smallest_index].end_i - object[smallest_index].start_i;
+    float distance = object[smallest_index].distance;
+    // Calculate the linear width. The scaling factor of .3 * (0.032 * distance) was found experimentally
+    float linear_width = object[smallest_index].linear_width;
+    lcd_printf("Object #: %d\nAngular Width: %d\nWidth: %.2f\nDistance: %.2f",
+               object_index, ang_width, linear_width, distance);
+               */
 
-        i = (i + 1) % object_num;
-        timer_waitMillis(1500);
-    }
+
+     i = 0;
+     while (1)
+     {
+     int object_index = object[i].index;
+     int ang_width = object[i].end_i - object[i].start_i;
+     float distance = object[i].distance;
+     // Calculate the linear width. The scaling factor of .3 * (0.032 * distance) was found experimentally
+     float linear_width = object[i].linear_width;
+     lcd_printf(
+     "Object #: %d\nAngular Width: %d\nWidth: %.2f\nDistance: %.2f",
+     object_index, ang_width, linear_width, distance);
+
+     i = (i + 1) % object_num;
+     timer_waitMillis(1500);
+     }
 }

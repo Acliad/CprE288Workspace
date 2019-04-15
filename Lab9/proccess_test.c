@@ -16,13 +16,14 @@
 typedef struct object {
   unsigned int start_i;
   unsigned int end_i;
-  unsigned int distance;
+  double distance;
   unsigned int index;
 } object_t;
 
 void proccess_data(object_t destination[], distance_t *data, int length);
 
 int main(void) {
+  lcd_init();
   object_t objects[10] = {0};
   proccess_data(objects, data, 181);
 
@@ -35,8 +36,8 @@ int main(void) {
   while (1) {
     int object_index = objects[i].index;
     int ang_width = objects[i].end_i - objects[i].start_i;
-    float distance = objects[i].distance;
-    float linear_width = distance * ang_width * M_PI / 180.00;
+    double distance = objects[i].distance;
+    float linear_width = distance * ang_width * M_PI / 180.00 * .3;
     lcd_printf("Object #: %d\nAngular Width: %d\nWidth: %.2f\nDistance: %.2f",
                object_index, ang_width, linear_width, distance);
 
@@ -47,7 +48,7 @@ int main(void) {
 
 void proccess_data(object_t destination[], distance_t data[], int length) {
   unsigned int object_num = 0;
-  unsigned int distance_sum = 0;
+  double distance_sum = 0.00;
   uint8_t processing = 0;
 
   int i = 0;
@@ -59,10 +60,11 @@ void proccess_data(object_t destination[], distance_t data[], int length) {
         destination[object_num].index = object_num + 1;
       }
       distance_sum += data[i].sonar_distance;
+      lcd_printf("%.2f", distance_sum);
     } else if (processing) {
       processing = 0;
       destination[object_num].end_i = i;
-      unsigned int num_samples = i - (destination[object_num].start_i);
+      double num_samples = i - (destination[object_num].start_i);
       if (num_samples > 0) {
         destination[object_num].distance = distance_sum / (num_samples);
         object_num++;
